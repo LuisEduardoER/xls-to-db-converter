@@ -2,12 +2,14 @@ package readers;
 
 import java.io.FileInputStream;
 import java.io.IOException; //import java.util.LinkedList;
+import java.util.LinkedList;
 
 import model.SheetLine;
 
 import org.apache.poi.ss.usermodel.*;
 
 import exceptions.UnsupportedFormatOfInputFileException;
+import exceptions.WrongCellFormatException;
 
 enum Cells {
 	CELL0(Cell.CELL_TYPE_STRING), CELL1(Cell.CELL_TYPE_STRING), CELL2(
@@ -21,7 +23,7 @@ enum Cells {
 		type = t;
 	}
 
-	public int gettType() {
+	public int getType() {
 		return type;
 	}
 }
@@ -38,15 +40,16 @@ public class WorkbookReader {
 		fileIn = new FileInputStream(filename);
 	}
 
-	public SheetLine getLine(int rowNum)
-			throws UnsupportedFormatOfInputFileException {
+	private SheetLine getLine(int rowNum)
+			throws UnsupportedFormatOfInputFileException,
+			WrongCellFormatException {
 
 		SheetLine sheetLine = new SheetLine();
 
 		Row row = sheet.getRow(rowNum);
-		Cell cell;
 		int cellNum = 0;
 		String mark = null;
+		Double tmp;
 
 		try {
 			sheetLine.setRow(rowNum);
@@ -55,21 +58,30 @@ public class WorkbookReader {
 			sheetLine.setType((String) readCell(row, cellNum++));
 			sheetLine.setName((String) readCell(row, cellNum++));
 			sheetLine.setAddress((String) readCell(row, cellNum++));
-			sheetLine.setUnp((Integer) readCell(row, cellNum++));
-			sheetLine.setOkpo((Long) readCell(row, cellNum++));
-			sheetLine.setAccount((Long) readCell(row, cellNum++));
+			tmp = (Double) readCell(row, cellNum++);
+			sheetLine.setUnp(tmp.intValue());
+			tmp = (Double) readCell(row, cellNum++);
+			sheetLine.setOkpo(tmp.longValue());
+			tmp = (Double) readCell(row, cellNum++);
+			sheetLine.setAccount(tmp.longValue());
 
-			mark = (String) readCell(row, cellNum);
-			if (mark.compareTo("с"/* rus */) == 0
-					|| mark.compareTo("С"/* RUS */) == 0
-					|| mark.compareTo("c"/* eng */) == 0
-					|| mark.compareTo("C"/* ENG */) == 0)
-				sheetLine.setNets(true);
-			else
+			if (row.getCell(cellNum) != null) {
+				mark = (String) readCell(row, cellNum);
+				if (mark.compareTo("с"/* rus */) == 0
+						|| mark.compareTo("С"/* RUS */) == 0
+						|| mark.compareTo("c"/* eng */) == 0
+						|| mark.compareTo("C"/* ENG */) == 0)
+					sheetLine.setNets(true);
+				else
+					sheetLine.setNets(false);
+			} else
 				sheetLine.setNets(false);
 		}
 		// TODO Обработка исключений
-		catch (Throwable e) {
+		catch (NumberFormatException e) {
+			// TODO: Правильно рассчитать номер столбца и строки
+			throw new WrongCellFormatException(cellNum, rowNum + 1);
+		} catch (Throwable e) {
 			e.printStackTrace();
 			throw new UnsupportedFormatOfInputFileException();
 		}
@@ -93,7 +105,20 @@ public class WorkbookReader {
 
 		return ob;
 	}
-	/*
-	 * public LinkedList fillList() { LinkedList }
-	 */
+
+	public LinkedList<SheetLine> fillList() {
+		LinkedList<SheetLine> list = new LinkedList<SheetLine>();
+		try {
+			for (int i = 1; i <= sheet.getLastRowNum(); i++) {
+				list.add(getLine(i));
+			}
+		} catch (WrongCellFormatException e) {
+			System.out.println(e);
+		} catch (UnsupportedFormatOfInputFileException e) {
+			System.out.println(e);
+			return null;
+		}
+
+		return list;
+	}
 }
