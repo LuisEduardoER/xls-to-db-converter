@@ -1,5 +1,6 @@
 package main;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 
 import readers.WorkbookReader;
@@ -20,22 +21,35 @@ public class Application {
 			System.out.println(e);
 			return;
 		}
+
 		WorkbookReader wbr = null;
 		filename = args[0];
 
 		try {
-			if (AppSlave.extAnalyzer(filename) == 0)
+			switch (AppSlave.extAnalyzer(filename)) {
+			case XLS:
 				wbr = new XLSReader(filename);
-			else if (AppSlave.extAnalyzer(filename) == 1)
+				break;
+			case XLSX:
 				wbr = new XLSXReader(filename);
+				break;
+			}
 		} catch (UnsupportedExtOfInputFileException e) {
+			System.out.println(e);
+			return;
+		} catch (FileNotFoundException e) {
 			System.out.println(e);
 			return;
 		}
 
+		// TODO
 		SheetLine sl;
-
-		sl = wbr.getLine(1);
+		try {
+			sl = wbr.getLine(1);
+		} catch (UnsupportedFormatOfInputFileException e) {
+			System.out.println(e);
+			return;
+		}
 
 		System.out.print(sl.getNumber() + " ");
 		System.out.print(sl.getType() + " ");
