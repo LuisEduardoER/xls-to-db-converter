@@ -18,7 +18,7 @@ import exceptions.DataBaseException;
 import model.SheetLine;
 
 /**
- * Класс для отправки извлечённых из Excel файла данных в БД
+ * Класс для отправки извлечённых из Excel-файла данных в БД
  * 
  * @throws DataBaseException генерируется при возникающих ошибках при SQL-запросах, создании файла отчёта и др.
  */
@@ -41,25 +41,38 @@ public class DBWorker {
 	
 	/**
 	 * Стандартный конструктор данные для подключения берутся из файла database.properties
-	 * @throws IOException 
-	 * @throws FileNotFoundException 
+	 * @throws DataBaseException генерируется при ошибке открытия или внутренней структуры файла database.properties
 	 */
-	public DBWorker() throws FileNotFoundException, IOException{
-		Properties properties = new Properties();
-		properties.load(new FileInputStream("resources/database.properties"));
+	public DBWorker() throws DataBaseException{
+		try {
+			Properties properties = new Properties();
+			properties.load(new FileInputStream("resources/database.properties"));
 		
-		this.url    			= properties.getProperty("db.url") + "/" + properties.getProperty("db.schema");
-		this.driver 			= properties.getProperty("db.driver");
-		this.user   			= properties.getProperty("db.user");
-		this.password 			= properties.getProperty("db.password");
-		this.useUnicode 		= properties.getProperty("db.useUnicode");
-		this.characterEncoding	= properties.getProperty("db.characterEncoding");
+			this.url    			= properties.getProperty("db.url") + "/" + properties.getProperty("db.schema");
+			this.driver 			= properties.getProperty("db.driver");
+			this.user   			= properties.getProperty("db.user");
+			this.password 			= properties.getProperty("db.password");
+			this.useUnicode 		= properties.getProperty("db.useUnicode");
+			this.characterEncoding	= properties.getProperty("db.characterEncoding");
+		}
+		catch (FileNotFoundException exception){
+			throw new DataBaseException("Не найден файл database.properties", exception);
+		}
+		catch (IOException exception){
+			throw new DataBaseException("Ошибка ввода/вывода в файле properties", exception);
+		}
 		
-		propertiesForConnect = new Properties();
-		propertiesForConnect.setProperty("user", user);
-		propertiesForConnect.setProperty("password", password);
-		propertiesForConnect.setProperty("useUnicode", useUnicode);
-		propertiesForConnect.setProperty("characterEncoding", characterEncoding);
+		try {
+			propertiesForConnect = new Properties();
+			propertiesForConnect.setProperty("user", user);
+			propertiesForConnect.setProperty("password", password);
+			propertiesForConnect.setProperty("useUnicode", useUnicode);
+			propertiesForConnect.setProperty("characterEncoding", characterEncoding);
+		}
+		catch (NullPointerException exception){
+			throw new DataBaseException("Ошибка данных файла database.properties", exception);
+		}
+		
 	}
 		
 	void finaly() {
@@ -238,7 +251,7 @@ public class DBWorker {
 				success++;
 				break;
 			case 1:
-				out.println("ОШИБКА. Строка " + sheetLine.getRow() + " не добавлена в БД. Указанный тип организации отсутсвует в БД");
+				out.println("ОШИБКА. Строка " + sheetLine.getRow() + " не добавлена в БД. Указанный тип организации отсутствует в БД");
 				break;
 			case 2:
 				out.println("ОШИБКА. Строка " + sheetLine.getRow() + " не добавлена в БД. Параметры не соответсвуют по длине");
