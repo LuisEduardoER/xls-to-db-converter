@@ -2,16 +2,18 @@ package main;
 
 import exceptions.*;
 
+enum Extensions {
+	XLS, XLSX
+}
+
 public class AppSlave {
 
-	// returns 0 if extension is .xls, 1 if .xlsx
-	// returns -1 if couldn't identify the extension
-	public static int extAnalyzer(String filename)
+	public static Extensions extAnalyzer(String filename)
 			throws UnsupportedExtOfInputFileException {
 		if (filename.endsWith(".xlsx"))
-			return 1;
+			return Extensions.XLSX;
 		if (filename.endsWith(".xls"))
-			return 0;
+			return Extensions.XLS;
 		throw new UnsupportedExtOfInputFileException();
 	}
 
