@@ -82,4 +82,10 @@ public class SheetLine {
 	public void setNets(boolean isNets) {
 		this.isNets = isNets;
 	}
+
+	public String toString() {
+		return getRow() + " " + getNumber() + " " + getType() + " " + getName()
+				+ " " + getAddress() + " " + getUnp() + " " + getOkpo() + " "
+				+ getAccount() + " " + isNets();
+	}
 }
