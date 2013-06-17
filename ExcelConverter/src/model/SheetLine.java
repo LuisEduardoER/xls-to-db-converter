@@ -82,7 +82,7 @@ public class SheetLine {
 	public void setNets(boolean isNets) {
 		this.isNets = isNets;
 	}
-
+	// TODO: Переделать return, дабы не плодить объекты тысячами...
 	public String toString() {
 		return getRow() + " " + getNumber() + " " + getType() + " " + getName()
 				+ " " + getAddress() + " " + getUnp() + " " + getOkpo() + " "
