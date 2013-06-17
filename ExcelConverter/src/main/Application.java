@@ -2,6 +2,8 @@ package main;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.Iterator;
+import java.util.LinkedList;
 
 import readers.WorkbookReader;
 import readers.XLSReader;
@@ -13,6 +15,7 @@ import exceptions.*;
 
 public class Application {
 	private static String filename;
+	private static LinkedList<SheetLine> list;
 
 	public static void main(String[] args) throws IOException {
 		try {
@@ -42,23 +45,19 @@ public class Application {
 			return;
 		}
 
-		// TODO
-		SheetLine sl;
+		list = wbr.fillList();
+		Iterator<SheetLine> iter = null;
+
 		try {
-			sl = wbr.getLine(1);
-		} catch (UnsupportedFormatOfInputFileException e) {
-			System.out.println(e);
+			iter = list.iterator();
+		} catch (NullPointerException e) {
+			System.out.println("Не удалось заполнить LinkedList");
 			return;
 		}
-
-		System.out.print(sl.getNumber() + " ");
-		System.out.print(sl.getType() + " ");
-		System.out.print(sl.getName() + " ");
-		System.out.print(sl.getAddress() + " ");
-		System.out.print(sl.getUnp() + " ");
-		System.out.print(sl.getOkpo() + " ");
-		System.out.print(sl.getAccount() + " ");
-		System.out.println(sl.isNets());
+		while (iter.hasNext()) {
+			SheetLine el = iter.next();
+			System.out.println(el);
+		}
 	}
 
 }
