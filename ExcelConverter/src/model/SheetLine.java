@@ -1,6 +1,7 @@
 package model;
 
 public class SheetLine {
+	private int row;
 	private String number;
 	private String type;
 	private String name;
@@ -9,6 +10,14 @@ public class SheetLine {
 	private long okpo;
 	private long account;
 	private boolean isNets;
+
+	public int getRow() {
+		return row;
+	}
+
+	public void setRow(int row) {
+		this.row = row;
+	}
 
 	public String getNumber() {
 		return number;
