@@ -1,6 +1,8 @@
 package jdbc;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.sql.DriverManager;
@@ -8,7 +10,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.LinkedList;
 import java.util.Properties;
-
 import com.mysql.jdbc.Connection;
 import com.mysql.jdbc.Statement;
 
@@ -20,72 +21,82 @@ public class DBWorker {
 	 * @throws SQLException 
 	 * @throws ClassNotFoundException 
 	 */
-	private Properties properties;
-	private String url;
+	private String url;					// Переменные для информации для подключения к БД
 	private String driver;
+	private String user;
+	private String password;
+	private String useUnicode;
+	private String characterEncoding;
+	
 	private Connection connection;
 	private Statement statement;
 	private ResultSet resultSet;
-	
+	private Properties propertiesForConnect; 
+		
 	private String [] typeOrgStr;
 	private long [] typeOrgId;
 	
 	// Конструкторы
-	public DBWorker(String dbName, String User, String Password, String ip, String port){
-		this.url = "jdbc:mysql://" + ip + ":" + port + "/" + dbName;
-		this.driver = "com.mysql.jdbc.Driver";
-		properties = new Properties();
-		properties.setProperty("user", User);
-		properties.setProperty("password", Password);
-		properties.setProperty("useUnicode", "true");
-		properties.setProperty("characterEncoding", "utf8");
+	/**
+	 * Стандартный конструктор данные для подключения берутся из файла database.properties
+	 * @throws IOException 
+	 * @throws FileNotFoundException 
+	 */
+	public DBWorker() throws FileNotFoundException, IOException{
+		Properties properties = new Properties();
+		properties.load(new FileInputStream("resources/database.properties"));
 		
+		this.url    			= properties.getProperty("db.url") + "/" + properties.getProperty("db.schema");
+		this.driver 			= properties.getProperty("db.driver");
+		this.user   			= properties.getProperty("db.user");
+		this.password 			= properties.getProperty("db.password");
+		this.useUnicode 		= properties.getProperty("db.useUnicode");
+		this.characterEncoding	= properties.getProperty("db.characterEncoding");
+		
+		propertiesForConnect = new Properties();
+		propertiesForConnect.setProperty("user", user);
+		propertiesForConnect.setProperty("password", password);
+		propertiesForConnect.setProperty("useUnicode", useUnicode);
+		propertiesForConnect.setProperty("characterEncoding", characterEncoding);
 	}
-	public DBWorker(String dbName){
-		this.url = "jdbc:mysql://localhost:3306/" + dbName;
-		this.driver = "com.mysql.jdbc.Driver";
-		properties = new Properties();
-		properties.setProperty("user", "root");
-		properties.setProperty("password", "");
-		properties.setProperty("useUnicode", "true");
-		properties.setProperty("characterEncoding", "utf8");
-			
-	}
-	
-	
+		
 	void finaly() throws SQLException{
 		DisConnection();
 	}
 	
-	public boolean Connection() {	// Подключение к БД
+	/**
+	 * Выполнение подключения к БД
+	 * @return true в случае успешного подключения<br>false в случае неудачи
+	 */
+	public boolean Connection() {
 		try {
-            Class.forName(driver);	//Регистрируем драйвер
-            connection = (Connection) DriverManager.getConnection(url, properties);	// Выполняем подключение к БД
-            statement = (Statement) connection.createStatement();
-            resultSet = null;
-         
-            resultSet = statement.executeQuery("set character_set_client='utf8'"); 
-            resultSet = statement.executeQuery("set character_set_results='utf8'");
+            Class.forName(driver);																// Регистрируем драйвер
+            connection = (Connection) DriverManager.getConnection(url, propertiesForConnect);	// Выполняем подключение к БД
+            statement  = (Statement) connection.createStatement();
+                     
+            resultSet = statement.executeQuery("set character_set_client='utf8'");				// Настраиваем MySQL на получение данных в utf8 
+            resultSet = statement.executeQuery("set character_set_results='utf8'");				// Настраиваем MySQL на возврат данных в utf8
             resultSet = statement.executeQuery("set collation_connection='utf8_general_ci'");
                  
             // Определяем все возможные типы организаций
-            resultSet = statement.executeQuery("SELECT COUNT(type) FROM OrgType");	// Количество разных типов организаций
+            resultSet = statement.executeQuery("SELECT COUNT(type) FROM OrgType");				// Количество разных типов организаций получаем из 2 таблицы
     		resultSet.next();
                		
-    		typeOrgStr = new String[resultSet.getInt(1)];
-    		typeOrgId = new long[resultSet.getInt(1)];
+    		typeOrgStr = new String[resultSet.getInt(1)];										// Массив для хранения полученных сокращений организаций (ООО, ЧУП, ИП...) 
+    		typeOrgId  = new long[resultSet.getInt(1)];											// Массив для хранения ID в БД полученных сокращений организаций (1, 2, 3...)
             
-            resultSet = statement.executeQuery("SELECT title, type FROM OrgType");	// Получаем все типы
+            resultSet = statement.executeQuery("SELECT title, type FROM OrgType");				// Получаем все типы оргнанизации из 2 таблицы
     		for (int i = 0; resultSet.next(); i++){
     			typeOrgStr[i] = resultSet.getString(1);
-    			typeOrgId[i] = resultSet.getLong(2);
+    			typeOrgId[i]  = resultSet.getLong(2);
     		}
     		
-    		for (int i = 0; resultSet.next(); i++){
+    		/**
+    		 * TODO только для отладки
+    		 */
+    		for (int i = 0; resultSet.next(); i++)
     			System.out.println(resultSet.getString(1) + " " + resultSet.getLong(2));
-    			 		}
-    		  		
-		} 
+    	} 
 		catch (ClassNotFoundException e) {
             e.printStackTrace();
 		}
