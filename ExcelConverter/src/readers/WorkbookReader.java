@@ -36,6 +36,7 @@ public class WorkbookReader {
 	protected Workbook wb;
 	protected Sheet sheet;
 	protected FileInputStream fileIn;
+	private final int NUM_OF_CELLS = 8;
 
 	WorkbookReader(String filename) throws IOException {
 		fileIn = new FileInputStream(filename);
@@ -53,21 +54,21 @@ public class WorkbookReader {
 		Double tmp;
 
 		try {
-			sheetLine.setRow(rowNum);
+			sheetLine.setRow(rowNum + 1);
 
-			sheetLine.setNumber((String) readCell(row, cellNum++));
-			sheetLine.setType((String) readCell(row, cellNum++));
-			sheetLine.setName((String) readCell(row, cellNum++));
-			sheetLine.setAddress((String) readCell(row, cellNum++));
-			tmp = (Double) readCell(row, cellNum++);
+			sheetLine.setNumber((String) readCell(row, cellNum++).getValue());
+			sheetLine.setType((String) readCell(row, cellNum++).getValue());
+			sheetLine.setName((String) readCell(row, cellNum++).getValue());
+			sheetLine.setAddress((String) readCell(row, cellNum++).getValue());
+			tmp = (Double) readCell(row, cellNum++).getValue();
 			sheetLine.setUnp(tmp.intValue());
-			tmp = (Double) readCell(row, cellNum++);
+			tmp = (Double) readCell(row, cellNum++).getValue();
 			sheetLine.setOkpo(tmp.longValue());
-			tmp = (Double) readCell(row, cellNum++);
+			tmp = (Double) readCell(row, cellNum++).getValue();
 			sheetLine.setAccount(tmp.longValue());
 
 			if (row.getCell(cellNum) != null) {
-				mark = (String) readCell(row, cellNum);
+				mark = (String) readCell(row, cellNum).getValue();
 				if (mark.compareTo("с"/* rus */) == 0
 						|| mark.compareTo("С"/* RUS */) == 0
 						|| mark.compareTo("c"/* eng */) == 0
@@ -80,49 +81,80 @@ public class WorkbookReader {
 		}
 		// TODO Обработка исключений
 		catch (NumberFormatException e) {
-			// TODO: Правильно рассчитать номер столбца и строки
 			throw new WrongCellFormatException(cellNum - 1, rowNum + 1);
-		} catch (Throwable e) {
+		} /*catch (Throwable e) {
 			e.printStackTrace();
 			throw new UnsupportedFormatOfInputFileException();
-		}
+		}*/
 
 		return sheetLine;
 
 	}
 
-	private ReturnedCell<?> readCell(Row row, int cellNum) {
-		
+	private ReturnedCell<?> readCell(Row row, int cellNum)
+			throws WrongCellFormatException {
+
 		Cell cell = row.getCell(cellNum);
 		ReturnedCell<String> retStringCell = null;
 		ReturnedCell<Double> retDoubleCell = null;
-		
+		ReturnedCell<?> retCell = null;
+		CellType type = Cells.valueOf("CELL" + cellNum).getType();
+
 		switch (cell.getCellType()) {
 		case Cell.CELL_TYPE_STRING:
 			retStringCell = new ReturnedCell<String>();
 			retStringCell.setValue(cell.getStringCellValue());
-			return retStringCell;
+			if (type != CellType.STRING) {
+				retDoubleCell = new ReturnedCell<Double>();
+				try {
+					retDoubleCell.setValue(Double.parseDouble(retStringCell
+							.getValue()));
+					retCell = retDoubleCell;
+				} catch (NumberFormatException e) {
+					throw new WrongCellFormatException(cellNum + 1, row
+							.getRowNum() + 1);
+				}
+			}
+			retCell = retStringCell;
+			break;
 		case Cell.CELL_TYPE_NUMERIC:
 			retDoubleCell = new ReturnedCell<Double>();
 			retDoubleCell.setValue(cell.getNumericCellValue());
-			return retDoubleCell;
+			if (type != CellType.INT && type != CellType.LONG) {
+				retStringCell = new ReturnedCell<String>();
+				try {
+					retStringCell.setValue(Double.toString(retDoubleCell
+							.getValue()));
+					retCell = retStringCell;
+				} catch (NumberFormatException e) {
+					throw new WrongCellFormatException(cellNum + 1, row
+							.getRowNum() + 1);
+				}
+			}
+			retCell = retDoubleCell;
+			break;
+		default:
+			throw new WrongCellFormatException(cellNum + 1, row.getRowNum() + 1);
 		}
-		
-		return null;
+
+		return retCell;
 
 	}
 
 	public LinkedList<SheetLine> fillList() {
 		LinkedList<SheetLine> list = new LinkedList<SheetLine>();
-		try {
-			for (int i = 1; i <= sheet.getLastRowNum(); i++) {
+		
+		for (int i = 1; i <= sheet.getLastRowNum(); i++) {
+			try {
 				list.add(getLine(i));
 			}
-		} catch (WrongCellFormatException e) {
-			System.out.println(e);
-		} catch (UnsupportedFormatOfInputFileException e) {
-			System.out.println(e);
-			return null;
+			catch (WrongCellFormatException e) {
+				// TODO: Write this information to report
+				System.out.println(e);
+			} catch (UnsupportedFormatOfInputFileException e) {
+				System.out.println(e);
+				return null;
+			}
 		}
 
 		return list;
