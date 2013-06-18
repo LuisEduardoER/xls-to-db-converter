@@ -15,6 +15,7 @@ import com.mysql.jdbc.Statement;
 
 import exceptions.DataBaseException;
 
+import model.Reporter;
 import model.SheetLine;
 
 /**
@@ -24,7 +25,6 @@ import model.SheetLine;
  */
 public class DBWorker {
 
-	// комментарий страшный
 	private String url;					// Переменные для информации для подключения к БД
 	private String driver;
 	private String user;
@@ -39,6 +39,13 @@ public class DBWorker {
 		
 	private String [] typeOrgStr;		// Для хранения типов организаций (ООО, ИП, ЧУП...)
 	private long   [] typeOrgId;		// и их ID в БД (1, 2, 3...)
+	
+	private final int  MAX_UNP 		= 999999999;		// Минимальные и максимальные значения УНП, ОКПО, Р/с
+	private final int  MIN_UNP 		= 100000000;
+	private final long MAX_OKPO 	= 999999999999l;
+	private final long MIN_OKPO 	= 100000000000l;
+	private final long MAX_ACCOUNT 	= 9999999999999l;
+	private final long MIN_ACCOUNT 	= 1000000000000l;
 	
 	/**
 	 * Стандартный конструктор данные для подключения берутся из файла database.properties
@@ -206,43 +213,25 @@ public class DBWorker {
 	 * 
 	 * @param tablename	имя таблицы БД
 	 * @param sl коллекция объектов с разобранными строками файла
-	 * @param filenameReport имя создаваемого файла отчёта
-	 * @throws DataBaseException генерируется в случае ошибки создания файла отчёта
+	 * @param report объект для работы с файлом отчёта
 	 */
-	public void sendToDB(String tablename, LinkedList<SheetLine> sl, String filenameReport) throws DataBaseException{
-		File     	file;	
-		PrintWriter out;
-		
-		try {
-			file = new File(filenameReport);
-			if (!file.exists())								// Проверяем, если файл не существует,
-				file.createNewFile();						// то создаём его
-			
-			out = new PrintWriter(file.getAbsoluteFile()); 	// PrintWriter обеспечит возможности записи в файл
-		} 
-		catch (IOException exception) {
-			/**
-			 * TODO Для отладки
-			 */
-			System.out.println("Ошибка создания файла");
-			throw new DataBaseException("Ошибка создания файла отчёта. Сохранение в БД не выполнено.", exception);
-		}
-		
-		out.println("Обнаружено записей в файле: " + sl.size());
+	public void sendToDB(String tablename, LinkedList<SheetLine> sl, Reporter report) {
+				
+		report.writeln("Обнаружено записей в файле: " + sl.size());
 		int success = 0;									// Успешно добавлено в БД 
 		
 		for (int i = 0; i < sl.size(); i++){
 			SheetLine sheetLine = sl.get(i);
 			if (sheetLine.getUnp() > 999999999 || sheetLine.getUnp() < 0){
-				out.println("ОШИБКА. Строка " + sheetLine.getRow() + " не добавлена в БД. Слишком длинный или отрицательный UNP.");
+				report.writeln("ОШИБКА. Строка " + sheetLine.getRow() + " не добавлена в БД. Слишком длинный или отрицательный UNP.");
 				continue;
 			}
 			if (sheetLine.getOkpo() > 999999999999l || sheetLine.getOkpo() < 0){
-				out.println("ОШИБКА. Строка " + sheetLine.getRow() + " не добавлена в БД. Слишком длинный или отрицательный OKPO.");
+				report.writeln("ОШИБКА. Строка " + sheetLine.getRow() + " не добавлена в БД. Слишком длинный или отрицательный OKPO.");
 				continue;
 			}
 			if (sheetLine.getAccount() > 9999999999999l || sheetLine.getAccount() < 0){
-				out.println("ОШИБКА. Строка " + sheetLine.getRow() + " не добавлена в БД. Слишком длинный или отрицательный расчётный счёт.");
+				report.writeln("ОШИБКА. Строка " + sheetLine.getRow() + " не добавлена в БД. Слишком длинный или отрицательный расчётный счёт.");
 				continue;
 			}
 			
@@ -252,19 +241,18 @@ public class DBWorker {
 				success++;
 				break;
 			case 1:
-				out.println("ОШИБКА. Строка " + sheetLine.getRow() + " не добавлена в БД. Указанный тип организации отсутствует в БД");
+				report.writeln("ОШИБКА. Строка " + sheetLine.getRow() + " не добавлена в БД. Указанный тип организации отсутствует в БД");
 				break;
 			case 2:
-				out.println("ОШИБКА. Строка " + sheetLine.getRow() + " не добавлена в БД. Параметры не соответсвуют по длине");
+				report.writeln("ОШИБКА. Строка " + sheetLine.getRow() + " не добавлена в БД. Параметры не соответсвуют по длине");
 				break;
 			case 3:
-				out.println("ОШИБКА. Строка " + sheetLine.getRow() + " не добавлена в БД. Неуточнённая ошибка");
+				report.writeln("ОШИБКА. Строка " + sheetLine.getRow() + " не добавлена в БД. Неуточнённая ошибка");
 				break;	
 			}
 		}
 		
-		out.print("Успешно добавлено записей: " + success);
-		out.close();
-				
+		report.writeln("Успешно добавлено записей: " + success);
+						
 	}
 }
