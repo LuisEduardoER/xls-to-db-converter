@@ -36,7 +36,7 @@ public class WorkbookReader {
 	protected Workbook wb;
 	protected Sheet sheet;
 	protected FileInputStream fileIn;
-	private final int NUM_OF_CELLS = 8;
+	//private final int NUM_OF_CELLS = 8;
 
 	WorkbookReader(String filename) throws IOException {
 		fileIn = new FileInputStream(filename);
