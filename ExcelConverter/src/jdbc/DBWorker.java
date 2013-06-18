@@ -115,6 +115,10 @@ public class DBWorker {
     		typeOrgStr = new String[resultSet.getInt(1)];										// Массив для хранения полученных сокращений организаций (ООО, ЧУП, ИП...) 
     		typeOrgId  = new long[resultSet.getInt(1)];											// Массив для хранения ID в БД полученных сокращений организаций (1, 2, 3...)
             
+    		/**
+    		 * TODO следующая одна строка только для отладки
+    		 */
+    		System.out.println("Все извлечённые из БД типы организаций:");
             resultSet = statement.executeQuery("SELECT title, type FROM " + dbTableOfOrgType);	// Получаем все типы оргнанизации из 2 таблицы
     		for (int i = 0; resultSet.next(); i++){
     			typeOrgStr[i] = resultSet.getString(1);
@@ -124,6 +128,10 @@ public class DBWorker {
     			 */
     			System.out.println(resultSet.getString(1) + " " + resultSet.getLong(2));
     		}
+    		/**
+    		 * TODO только для отладки
+    		 */
+    		System.out.println("---------------------------------------");
     	} 
 		catch (ClassNotFoundException exception) {
             throw new DataBaseException("Ошибка создания объекта класса", exception);
@@ -165,7 +173,9 @@ public class DBWorker {
 	 * 				0 - запись добавлена<br>
 	 * 				1 - запись не добавлена (тип организации отсутсвует в БД)<br>
 	 * 				2 - запись не добавлена (несоответсвие параметров длине)<br>
-	 * 				3 - запись не добавлена (неизвестная ошибка)
+	 * 				3 - запись не добавлена (неизвестная ошибка)<br>
+	 * 				4 - запись не добавлена (организация уже присутствует в БД)<br>
+	 * 				5 - запись не добавлена (не прошёл запрос на проверку уникальности данной организации)
 	 */
 	private int insert(String number, String type, String name, String adress, String unp, String okpo, String account, boolean isNet) {
 		
@@ -181,17 +191,16 @@ public class DBWorker {
 			return 1;
 		
 		try {
-			resultSet = statement.executeQuery("SELECT COUNT(*) FROM " + dbTableOfOrgType + " WHERE number = \"" + number +
-						"\" AND type = " + type + " AND name = \"" + name + "\" AND adress = \"" + adress + "\" AND unp = " +
-						unp + " AND okpo = " + okpo + " AND account = " + account + "AND isNet = " + isNet);
+			resultSet = statement.executeQuery("SELECT COUNT(*) FROM " + dbTableOfOrg + " WHERE number = \"" + number +
+						"\" AND type = " + typeOrgId[typeOrg] + " AND name = \"" + name + "\" AND adress = \"" + adress + "\" AND unp = " +
+						unp + " AND okpo = " + okpo + " AND account = " + account + " AND isNet = " + isNet);
 			resultSet.next();
-			/**
-			 * 
-			 * TODO ДОДЕЛАТЬ
-			 */
+			if (resultSet.getInt(1) > 0)				// Если в БД уже такая организация
+				return 4;
 		}
-		
-		
+		catch (SQLException e) {						// Если запрос на выборку неккорректен
+			return 5;
+		}				
 		
 		String insertQuerry;							// Добавление в таблицу типа органицзации с помощью SQL-запроса INSERT
 		insertQuerry = "INSERT INTO " + dbTableOfOrg + " (number, type, name, adress, unp, okpo, account, isNet) VALUES (\"" + number + 
@@ -201,7 +210,7 @@ public class DBWorker {
 		/**
 		 * TODO только для отладки
 		 */
-		System.out.println(insertQuerry);
+		System.out.println("Выполняем запрос на добавление: " + insertQuerry);
 		
 		try {
 			statement.executeUpdate(insertQuerry);
@@ -261,8 +270,17 @@ public class DBWorker {
 				report.writeln("ОШИБКА. Строка " + sheetLine.getRow() + " не добавлена в БД. Параметры не соответсвуют по длине");
 				break;
 			case 3:
-				report.writeln("ОШИБКА. Строка " + sheetLine.getRow() + " не добавлена в БД. Неуточнённая ошибка");
+				report.writeln("ОШИБКА. Строка " + sheetLine.getRow() + " не добавлена в БД. Неизвестная ошибка");
 				break;	
+			case 4:
+				report.writeln("ОШИБКА. Строка " + sheetLine.getRow() + " не добавлена в БД. Такая организация уже есть в БД");
+				break;
+			case 5:
+				report.writeln("ОШИБКА. Строка " + sheetLine.getRow() + " не добавлена в БД. Не прошёл SQL-запрос на проверку уникальности данной организации");
+				break;
+			default:
+				report.writeln("ОШИБКА. Строка " + sheetLine.getRow() + " не добавлена в БД. Ошибка программирования. Если вы видете эту надпись, значит ошибся программист");
+				break;
 			}
 		}
 		
