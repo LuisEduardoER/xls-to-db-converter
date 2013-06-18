@@ -11,6 +11,7 @@ import readers.WorkbookReader;
 import readers.XLSReader;
 import readers.XLSXReader;
 
+import model.Report;
 import model.SheetLine;
 
 import exceptions.*;
@@ -18,8 +19,16 @@ import exceptions.*;
 public class Application {
 	private static String filename;
 	private static LinkedList<SheetLine> list;
+	private static Report report;
 
 	public static void main(String[] args) throws IOException {
+		try {
+			report = new Report("report.txt");
+		} catch (IOException e) {
+			System.out.println("Ошибка при создании файла отчета");
+			return;
+		}
+
 		try {
 			AppSlave.commandLineArgumentsTester(args);
 		} catch (CommandLineArgumentException e) {
@@ -33,17 +42,17 @@ public class Application {
 		try {
 			switch (AppSlave.extAnalyzer(filename)) {
 			case XLS:
-				wbr = new XLSReader(filename);
+				wbr = new XLSReader(filename, report);
 				break;
 			case XLSX:
-				wbr = new XLSXReader(filename);
+				wbr = new XLSXReader(filename, report);
 				break;
 			}
 		} catch (UnsupportedExtOfInputFileException e) {
-			System.out.println(e);
+			report.writeln(e.toString());
 			return;
 		} catch (FileNotFoundException e) {
-			System.out.println(e);
+			report.writeln(e.toString());
 			return;
 		}
 
@@ -53,9 +62,10 @@ public class Application {
 		try {
 			iter = list.iterator();
 		} catch (NullPointerException e) {
-			System.out.println("Не удалось заполнить LinkedList");
+			report.writeln("Не удалось заполнить LinkedList");
 			return;
 		}
+
 		while (iter.hasNext()) {
 			SheetLine el = iter.next();
 			System.out.println(el);
@@ -63,16 +73,10 @@ public class Application {
 
 		// Working with database
 		/*
-		try {
-			DBWorker db = new DBWorker();
-			db.сonnect();
-			db.sendToDB("Org", list, "report.txt");
-			db.disconnect();
-		}
-		catch (DataBaseException e){
-			System.out.println(e.getMessage());
-		}
-		*/
+		 * try { DBWorker db = new DBWorker(); db.сonnect(); db.sendToDB(list,
+		 * report); db.disconnect(); } catch (DataBaseException e) {
+		 * report.writeln(e.getMessage()); } finally { report.close(); }
+		 */
+		report.close();
 	}
-
 }

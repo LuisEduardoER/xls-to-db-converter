@@ -11,7 +11,6 @@ public class Report {
 		try {
 			fileWriter = new FileWriter(filename);
 		} catch (IOException e) {
-			System.out.println("Ошибка при создании файла отчета");
 			throw e;
 		}
 	}
@@ -21,7 +20,7 @@ public class Report {
 	 * 
 	 * @throws IOException
 	 */
-	public void closeFile() throws IOException {
+	public void close() throws IOException {
 		try {
 			fileWriter.close();
 		} catch (IOException e) {
@@ -58,6 +57,6 @@ public class Report {
 	 */
 	protected void finalize() throws IOException {
 		if (fileWriter != null)
-			closeFile();
+			close();
 	}
 }
