@@ -5,7 +5,7 @@ import java.io.IOException;
 import java.util.Iterator;
 import java.util.LinkedList;
 
-import jdbc.DBWorker;
+//import jdbc.DBWorker;
 
 import readers.WorkbookReader;
 import readers.XLSReader;
@@ -60,16 +60,19 @@ public class Application {
 			SheetLine el = iter.next();
 			System.out.println(el);
 		}
-		
-		/*try {
+
+		// Working with database
+		/*
+		try {
 			DBWorker db = new DBWorker();
 			db.сonnect();
 			db.sendToDB("Org", list, "report.txt");
 			db.disconnect();
 		}
 		catch (DataBaseException e){
-			System.out.println(e.getMessage());			
-		}*/
+			System.out.println(e.getMessage());
+		}
+		*/
 	}
 
 }
