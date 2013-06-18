@@ -1,5 +1,6 @@
 package jdbc;
 
+import java.io.IOException;
 import java.util.LinkedList;
 import java.util.Random;
 
@@ -21,7 +22,8 @@ public class TestApp {
 		SheetLine				l1;						// Для теста добавления дублируемых организаций
 		int 					num 		= 1;
 		
-		for (SheetLine sl: l4){
+		// Создаём случайные организации
+		for (SheetLine sl: l4) {
 			sl = new SheetLine();
 			sl.setNumber	("#" + rand.nextInt(10000000));
 			sl.setRow		(num++);
@@ -35,6 +37,7 @@ public class TestApp {
 			l.add(sl);
 		}
 		
+		// Создаём фиксированную организацию для теста на недобавление дублирующих организаций
 		l1 = new SheetLine();
 		l1.setNumber	("#11111");
 		l1.setRow		(num++);
@@ -47,20 +50,17 @@ public class TestApp {
 		l1.setNets		(false);
 		l.add(l1);
 		
-		/**
-		 * TODO
-		 * Пример работы с файлом
-		 */
+		// Пример работы с файлом (!файл должен быть закрыт в конце)
 		Reporter r = new Reporter();
-		r.createFile("report.txt");
+		try {
+			r.createFile("report.txt");
+		}
+		catch (IOException exception){
+			System.out.println("Исключение генерируемое при ошибке создания файла");
+			System.out.println(exception.getMessage());
+		}
 		
-		
-		
-		
-		/**
-		 * TODO
-		 * пример работы с DBWorker
-		 */
+		// Пример работы с DBWorker
 		DBWorker db;
 		try {
 			db = new DBWorker();
@@ -69,11 +69,11 @@ public class TestApp {
 			db.disconnect();
 		}
 		catch (DataBaseException exception){
-			System.out.println("Сработало исключение DataBaseException. Программа остановлена.");
+			System.out.println("Сработало исключение DataBaseException. Вывод в файл остановлен!");
 			System.out.println("Причина: " + exception.getMessage());
 		}
 		
-		r.closeFile();
+		r.closeFile();	// Закрытие файла
 	}
 
 }

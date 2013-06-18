@@ -17,8 +17,9 @@ public class Reporter {
 	 * TODO доработать обработку исключений
 	 * 
 	 * @param reportFilename имя создаваемого файла
+	 * @throws IOException генерируется при ошибке создания файла
 	 */
-	public void createFile(String reportFilename) {
+	public void createFile(String reportFilename) throws IOException {
 		try {
 			file = new File(reportFilename);
 			if (!file.exists())								// Проверяем, если файл не существует,
@@ -28,9 +29,10 @@ public class Reporter {
 		} 
 		catch (IOException exception) {
 			/**
-			 * TODO Для отладки. Сделать обработку исключений
+			 * TODO Для отладки.
 			 */
 			System.out.println("Ошибка создания файла");
+			throw exception;
 		}
 	}
 	
@@ -39,6 +41,7 @@ public class Reporter {
 	 */
 	public void closeFile() {
 		out.close();
+		out = null;
 	}
 	
 	/**
@@ -59,4 +62,11 @@ public class Reporter {
 		out.print(text);
 	}
 	
+	/**
+	 * Закрытие файла (если он не был закрыт) при удалении объекта сборщиком мусора.
+	 */
+	void finaly(){
+		if (out != null)
+			closeFile();
+	}
 }
