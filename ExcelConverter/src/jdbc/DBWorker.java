@@ -1,10 +1,8 @@
 package jdbc;
 
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -31,6 +29,8 @@ public class DBWorker {
 	private String password;
 	private String useUnicode;
 	private String characterEncoding;
+	private String dbTableOfOrg;
+	private String dbTableOfOrgType;
 	
 	private Connection connection;		// Ссылки на объекты для подключения к БД
 	private Statement  statement;
@@ -62,6 +62,8 @@ public class DBWorker {
 			this.password 			= properties.getProperty("db.password");
 			this.useUnicode 		= properties.getProperty("db.useUnicode");
 			this.characterEncoding	= properties.getProperty("db.characterEncoding");
+			this.dbTableOfOrg		= properties.getProperty("db.dbTableOfOrg");
+			this.dbTableOfOrgType	= properties.getProperty("db.dbTableOfOrgType");
 		}
 		catch (FileNotFoundException exception){
 			throw new DataBaseException("Не найден файл database.properties", exception);
@@ -107,13 +109,13 @@ public class DBWorker {
             resultSet = statement.executeQuery("set collation_connection='utf8_general_ci'");
                  
             // Определяем все возможные типы организаций
-            resultSet = statement.executeQuery("SELECT COUNT(type) FROM OrgType");				// Количество разных типов организаций получаем из 2 таблицы
+            resultSet = statement.executeQuery("SELECT COUNT(type) FROM " + dbTableOfOrgType);	// Количество разных типов организаций получаем из 2 таблицы
     		resultSet.next();
                		
     		typeOrgStr = new String[resultSet.getInt(1)];										// Массив для хранения полученных сокращений организаций (ООО, ЧУП, ИП...) 
     		typeOrgId  = new long[resultSet.getInt(1)];											// Массив для хранения ID в БД полученных сокращений организаций (1, 2, 3...)
             
-            resultSet = statement.executeQuery("SELECT title, type FROM OrgType");				// Получаем все типы оргнанизации из 2 таблицы
+            resultSet = statement.executeQuery("SELECT title, type FROM " + dbTableOfOrgType);	// Получаем все типы оргнанизации из 2 таблицы
     		for (int i = 0; resultSet.next(); i++){
     			typeOrgStr[i] = resultSet.getString(1);
     			typeOrgId[i]  = resultSet.getLong(2);
@@ -150,7 +152,6 @@ public class DBWorker {
 	/**
 	 * Метод вставляет в указанную таблицу одну строку об указанной организации
 	 * 
-	 * @param table имя таблицы в БД
 	 * @param number № организации
 	 * @param type тип организации (ООО, ИП, ЧУП...)
 	 * @param name имя организации
@@ -166,7 +167,7 @@ public class DBWorker {
 	 * 				2 - запись не добавлена (несоответсвие параметров длине)<br>
 	 * 				3 - запись не добавлена (неизвестная ошибка)
 	 */
-	private int insert(String table, String number, String type, String name, String adress, String unp, String okpo, String account, boolean isNet) {
+	private int insert(String number, String type, String name, String adress, String unp, String okpo, String account, boolean isNet) {
 		
 		int typeOrg = -1;								// Хранение ID типа организации 
 		
@@ -180,7 +181,9 @@ public class DBWorker {
 			return 1;
 		
 		String insertQuerry;							// Добавление в таблицу типа органицзации с помощью SQL запроса INSERT
-		insertQuerry = "INSERT INTO " + table + " (number, type, name, adress, unp, okpo, account, isNet) VALUES (\"" + number + "\", \"" + typeOrgId[typeOrg] + "\", \"" + name + "\", \"" + adress + "\", " + unp + ", " + okpo + ", " + account + ", " + isNet + ")";  
+		insertQuerry = "INSERT INTO " + dbTableOfOrg + " (number, type, name, adress, unp, okpo, account, isNet) VALUES (\"" + number + 
+						"\", \"" + typeOrgId[typeOrg] + "\", \"" + name + "\", \"" + adress + "\", " + unp + ", " + okpo + ", " + 
+						account + ", " + isNet + ")";  
 				
 		/**
 		 * TODO только для отладки
@@ -209,13 +212,11 @@ public class DBWorker {
 
 	/**
 	 * Метод для сохранения в подключённой БД записей, прочитанных из Excel файла и помещённых в коллекцию.
-	 * Метод также генерирует файл отчёта.
 	 * 
-	 * @param tablename	имя таблицы БД
 	 * @param sl коллекция объектов с разобранными строками файла
 	 * @param report объект для работы с файлом отчёта
 	 */
-	public void sendToDB(String tablename, LinkedList<SheetLine> sl, Reporter report) {
+	public void sendToDB(LinkedList<SheetLine> sl, Reporter report) {
 				
 		report.writeln("Обнаружено записей в файле: " + sl.size());
 		int success = 0;									// Успешно добавлено в БД 
@@ -235,7 +236,7 @@ public class DBWorker {
 				continue;
 			}
 			
-			switch (insert(tablename, sheetLine.getNumber(), sheetLine.getType(), sheetLine.getName(), sheetLine.getAddress(), 
+			switch (insert(sheetLine.getNumber(), sheetLine.getType(), sheetLine.getName(), sheetLine.getAddress(), 
 					String.valueOf(sheetLine.getUnp()), String.valueOf(sheetLine.getOkpo()), String.valueOf(sheetLine.getAccount()), sheetLine.isNets())){
 			case 0:
 				success++;
