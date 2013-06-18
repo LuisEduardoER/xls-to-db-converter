@@ -4,6 +4,7 @@ import java.util.LinkedList;
 import java.util.Random;
 
 import exceptions.DataBaseException;
+import model.Reporter;
 import model.SheetLine;
 
 public class TestApp {
@@ -33,19 +34,33 @@ public class TestApp {
 			l.add(sl);
 		}
 		
-	
+		/**
+		 * TODO
+		 * Пример работы с файлом
+		 */
+		Reporter r = new Reporter();
+		r.createFile("report.txt");
 		
+		
+		//
+		
+		/**
+		 * TODO
+		 * пример работы с DBWorker
+		 */
 		DBWorker db;
 		try {
 			db = new DBWorker();
 			db.сonnect();
-			db.sendToDB("Org", l, "report.txt");
+			db.sendToDB("Org", l, r);
 			db.disconnect();
 		}
 		catch (DataBaseException exception){
 			System.out.println("Сработало исключение DataBaseException. Программа остановлена.");
 			System.out.println("Причина: " + exception.getMessage());
-		}
+		}//
+		
+		r.closeFile();
 	}
 
 }
