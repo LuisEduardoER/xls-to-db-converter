@@ -42,7 +42,7 @@ public class TestApp {
 		r.createFile("report.txt");
 		
 		
-		//
+		
 		
 		/**
 		 * TODO
@@ -52,13 +52,13 @@ public class TestApp {
 		try {
 			db = new DBWorker();
 			db.сonnect();
-			db.sendToDB("Org", l, r);
+			db.sendToDB(l, r);
 			db.disconnect();
 		}
 		catch (DataBaseException exception){
 			System.out.println("Сработало исключение DataBaseException. Программа остановлена.");
 			System.out.println("Причина: " + exception.getMessage());
-		}//
+		}
 		
 		r.closeFile();
 	}
