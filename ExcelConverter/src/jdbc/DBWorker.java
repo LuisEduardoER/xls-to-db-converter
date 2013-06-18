@@ -180,7 +180,20 @@ public class DBWorker {
 		if (typeOrg == -1)								// Тип не найден
 			return 1;
 		
-		String insertQuerry;							// Добавление в таблицу типа органицзации с помощью SQL запроса INSERT
+		try {
+			resultSet = statement.executeQuery("SELECT COUNT(*) FROM " + dbTableOfOrgType + " WHERE number = \"" + number +
+						"\" AND type = " + type + " AND name = \"" + name + "\" AND adress = \"" + adress + "\" AND unp = " +
+						unp + " AND okpo = " + okpo + " AND account = " + account + "AND isNet = " + isNet);
+			resultSet.next();
+			/**
+			 * 
+			 * TODO ДОДЕЛАТЬ
+			 */
+		}
+		
+		
+		
+		String insertQuerry;							// Добавление в таблицу типа органицзации с помощью SQL-запроса INSERT
 		insertQuerry = "INSERT INTO " + dbTableOfOrg + " (number, type, name, adress, unp, okpo, account, isNet) VALUES (\"" + number + 
 						"\", \"" + typeOrgId[typeOrg] + "\", \"" + name + "\", \"" + adress + "\", " + unp + ", " + okpo + ", " + 
 						account + ", " + isNet + ")";  
