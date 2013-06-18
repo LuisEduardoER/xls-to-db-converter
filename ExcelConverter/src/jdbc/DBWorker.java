@@ -69,7 +69,7 @@ public class DBWorker {
 			throw new DataBaseException("Не найден файл database.properties", exception);
 		}
 		catch (IOException exception){
-			throw new DataBaseException("Ошибка ввода/вывода в файле properties", exception);
+			throw new DataBaseException("Ошибка ввода/вывода в файле database.properties", exception);
 		}
 		
 		try {
@@ -85,6 +85,9 @@ public class DBWorker {
 		
 	}
 		
+	/**
+	 * Попытка отключения от БД (если отключение не было произведено) при удалении объекта сборщиком мусора.
+	 */
 	void finaly() {
 		try {
 			disconnect();
@@ -179,7 +182,7 @@ public class DBWorker {
 	 */
 	private int insert(String number, String type, String name, String adress, String unp, String okpo, String account, boolean isNet) {
 		
-		int typeOrg = -1;								// Хранение ID типа организации 
+		int typeOrg = -1;								// Хранение ID типа организации (индекса массива typeOrgId)
 		
 		for (int i = 0; i < typeOrgId.length; i++)		// Поиск ID типа организации 
 			if (typeOrgStr[i].compareTo(type) == 0) {
@@ -240,7 +243,7 @@ public class DBWorker {
 	 */
 	public void sendToDB(LinkedList<SheetLine> sl, Reporter report) {
 				
-		report.writeln("Обнаружено записей в файле: " + sl.size());
+		report.writeln("Обнаружено записей: " + sl.size());
 		int success = 0;									// Успешно добавлено в БД 
 		
 		for (int i = 0; i < sl.size(); i++){

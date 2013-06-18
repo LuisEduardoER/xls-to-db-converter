@@ -2,8 +2,6 @@ package exceptions;
 
 /**
  * Исключение генерируемое при работе с объектом класса <code>DBWorker</code>
- * 
- * @author Андрей В
  */
 public class DataBaseException extends Exception {
 
