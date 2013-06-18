@@ -18,6 +18,7 @@ public class TestApp {
 		Random 					rand 		= new Random();
 		LinkedList <SheetLine> 	l 			= new LinkedList<SheetLine>();
 		SheetLine 				l4[] 		= new SheetLine[10];
+		SheetLine				l1;						// Для теста добавления дублируемых организаций
 		int 					num 		= 1;
 		
 		for (SheetLine sl: l4){
@@ -33,6 +34,18 @@ public class TestApp {
 			sl.setNets		(rand.nextInt(2)==1?true:false);
 			l.add(sl);
 		}
+		
+		l1 = new SheetLine();
+		l1.setNumber	("#11111");
+		l1.setRow		(num++);
+		l1.setType		("ООО");
+		l1.setName		("Повтор incorporation");
+		l1.setAddress	("ул. Пушкинская 1");
+		l1.setUnp		(10101010);
+		l1.setOkpo		(2020202020l);
+		l1.setAccount	(3030303030l);
+		l1.setNets		(false);
+		l.add(l1);
 		
 		/**
 		 * TODO
