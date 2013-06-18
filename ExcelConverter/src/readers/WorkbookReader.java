@@ -11,26 +11,27 @@ import org.apache.poi.ss.usermodel.*;
 import exceptions.UnsupportedFormatOfInputFileException;
 import exceptions.WrongCellFormatException;
 
+enum CellType {
+	STRING, INT, LONG
+}
+
 enum Cells {
-	CELL0(Cell.CELL_TYPE_STRING), CELL1(Cell.CELL_TYPE_STRING), CELL2(
-			Cell.CELL_TYPE_STRING), CELL3(Cell.CELL_TYPE_STRING), CELL4(
-			Cell.CELL_TYPE_NUMERIC), CELL5(Cell.CELL_TYPE_NUMERIC), CELL6(
-			Cell.CELL_TYPE_NUMERIC), CELL7(Cell.CELL_TYPE_STRING);
+	CELL0(CellType.STRING), CELL1(CellType.STRING), CELL2(CellType.STRING), CELL3(
+			CellType.STRING), CELL4(CellType.INT), CELL5(CellType.LONG), CELL6(
+			CellType.LONG), CELL7(CellType.STRING);
 
-	private int type;
+	private CellType type;
 
-	Cells(int t) {
+	Cells(CellType t) {
 		type = t;
 	}
 
-	public int getType() {
+	public CellType getType() {
 		return type;
 	}
 }
 
 public class WorkbookReader {
-
-	private final int NUM_OF_CELLS = 8;
 
 	protected Workbook wb;
 	protected Sheet sheet;
@@ -80,7 +81,7 @@ public class WorkbookReader {
 		// TODO Обработка исключений
 		catch (NumberFormatException e) {
 			// TODO: Правильно рассчитать номер столбца и строки
-			throw new WrongCellFormatException(cellNum, rowNum + 1);
+			throw new WrongCellFormatException(cellNum - 1, rowNum + 1);
 		} catch (Throwable e) {
 			e.printStackTrace();
 			throw new UnsupportedFormatOfInputFileException();
@@ -90,20 +91,25 @@ public class WorkbookReader {
 
 	}
 
-	private Object readCell(Row row, int cellNum) {
-		Object ob = new Object();
+	private ReturnedCell<?> readCell(Row row, int cellNum) {
+		
 		Cell cell = row.getCell(cellNum);
-
+		ReturnedCell<String> retStringCell = null;
+		ReturnedCell<Double> retDoubleCell = null;
+		
 		switch (cell.getCellType()) {
 		case Cell.CELL_TYPE_STRING:
-			ob = cell.getStringCellValue();
-			break;
+			retStringCell = new ReturnedCell<String>();
+			retStringCell.setValue(cell.getStringCellValue());
+			return retStringCell;
 		case Cell.CELL_TYPE_NUMERIC:
-			ob = cell.getNumericCellValue();
-			break;
+			retDoubleCell = new ReturnedCell<Double>();
+			retDoubleCell.setValue(cell.getNumericCellValue());
+			return retDoubleCell;
 		}
+		
+		return null;
 
-		return ob;
 	}
 
 	public LinkedList<SheetLine> fillList() {
