@@ -24,6 +24,7 @@ import model.SheetLine;
  */
 public class DBWorker {
 
+	// комментарий страшный
 	private String url;					// Переменные для информации для подключения к БД
 	private String driver;
 	private String user;
