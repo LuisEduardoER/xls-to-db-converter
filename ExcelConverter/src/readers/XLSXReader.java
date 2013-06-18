@@ -1,12 +1,15 @@
 package readers;
 
 import java.io.IOException;
+
+import model.Report;
+
 import org.apache.poi.xssf.usermodel.*;
 
 public class XLSXReader extends WorkbookReader {
 
-	public XLSXReader(String filename) throws IOException {
-		super(filename);
+	public XLSXReader(String filename, Report r) throws IOException {
+		super(filename, r);
 
 		wb = new XSSFWorkbook(fileIn);
 

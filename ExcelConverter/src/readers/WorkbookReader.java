@@ -4,6 +4,7 @@ import java.io.FileInputStream;
 import java.io.IOException; //import java.util.LinkedList;
 import java.util.LinkedList;
 
+import model.Report;
 import model.SheetLine;
 
 import org.apache.poi.ss.usermodel.*;
@@ -36,10 +37,13 @@ public class WorkbookReader {
 	protected Workbook wb;
 	protected Sheet sheet;
 	protected FileInputStream fileIn;
-	//private final int NUM_OF_CELLS = 8;
+	protected Report report;
 
-	WorkbookReader(String filename) throws IOException {
+	// private final int NUM_OF_CELLS = 8;
+
+	WorkbookReader(String filename, Report report) throws IOException {
 		fileIn = new FileInputStream(filename);
+		this.report = report;
 	}
 
 	private SheetLine getLine(int rowNum)
@@ -82,10 +86,7 @@ public class WorkbookReader {
 		// TODO Обработка исключений
 		catch (NumberFormatException e) {
 			throw new WrongCellFormatException(cellNum - 1, rowNum + 1);
-		} /*catch (Throwable e) {
-			e.printStackTrace();
-			throw new UnsupportedFormatOfInputFileException();
-		}*/
+		}
 
 		return sheetLine;
 
@@ -111,8 +112,8 @@ public class WorkbookReader {
 							.getValue()));
 					retCell = retDoubleCell;
 				} catch (NumberFormatException e) {
-					throw new WrongCellFormatException(cellNum + 1, row
-							.getRowNum() + 1);
+					throw new WrongCellFormatException(cellNum + 1,
+							row.getRowNum() + 1);
 				}
 			}
 			retCell = retStringCell;
@@ -127,8 +128,8 @@ public class WorkbookReader {
 							.getValue()));
 					retCell = retStringCell;
 				} catch (NumberFormatException e) {
-					throw new WrongCellFormatException(cellNum + 1, row
-							.getRowNum() + 1);
+					throw new WrongCellFormatException(cellNum + 1,
+							row.getRowNum() + 1);
 				}
 			}
 			retCell = retDoubleCell;
@@ -141,18 +142,17 @@ public class WorkbookReader {
 
 	}
 
-	public LinkedList<SheetLine> fillList() {
+	public LinkedList<SheetLine> fillList() throws IOException {
 		LinkedList<SheetLine> list = new LinkedList<SheetLine>();
-		
+
 		for (int i = 1; i <= sheet.getLastRowNum(); i++) {
 			try {
 				list.add(getLine(i));
-			}
-			catch (WrongCellFormatException e) {
+			} catch (WrongCellFormatException e) {
 				// TODO: Write this information to report
-				System.out.println(e);
+				report.writeln(e.toString());
 			} catch (UnsupportedFormatOfInputFileException e) {
-				System.out.println(e);
+				report.writeln(e.toString());
 				return null;
 			}
 		}
