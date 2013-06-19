@@ -326,6 +326,7 @@ public class DBWorker {
 		}
 
 		report.writeln("Успешно добавлено записей: " + success);
+		report.writeln("Не добавлено записей: " + (sl.size() - success));
 
 	}
 }
