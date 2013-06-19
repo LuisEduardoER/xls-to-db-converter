@@ -8,11 +8,7 @@ public class Report {
 	private FileWriter fileWriter;
 
 	public Report(String filename) throws IOException {
-		try {
-			fileWriter = new FileWriter(filename);
-		} catch (IOException e) {
-			throw e;
-		}
+		fileWriter = new FileWriter(filename);
 	}
 
 	/**
@@ -21,11 +17,7 @@ public class Report {
 	 * @throws IOException
 	 */
 	public void close() throws IOException {
-		try {
-			fileWriter.close();
-		} catch (IOException e) {
-			throw e;
-		}
+		fileWriter.close();
 	}
 
 	/**
