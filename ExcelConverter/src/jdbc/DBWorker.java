@@ -349,6 +349,7 @@ public class DBWorker {
 		}
 
 		report.writeln("Успешно добавлено записей: " + success);
+		// TODO: Правильный расчет недобавленных записей
 		report.writeln("Не добавлено записей: " + (sl.size() - success));
 
 	}
