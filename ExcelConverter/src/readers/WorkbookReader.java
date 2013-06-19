@@ -1,6 +1,8 @@
 package readers;
 
+import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException; //import java.util.LinkedList;
 import java.util.LinkedList;
 
@@ -9,6 +11,7 @@ import model.SheetLine;
 
 import org.apache.poi.ss.usermodel.*;
 
+import exceptions.InputFileNotFoundException;
 import exceptions.UnsupportedFormatOfInputFileException;
 import exceptions.WrongCellFormatException;
 
@@ -41,8 +44,13 @@ public class WorkbookReader {
 
 	// private final int NUM_OF_CELLS = 8;
 
-	WorkbookReader(String filename, Report report) throws IOException {
-		fileIn = new FileInputStream(filename);
+	WorkbookReader(String filename, Report report) throws FileNotFoundException {
+		File file = new File(filename);
+		try {
+			fileIn = new FileInputStream(filename);
+		} catch (FileNotFoundException e) {
+			throw new InputFileNotFoundException(file.getAbsolutePath());
+		}
 		this.report = report;
 	}
 
@@ -141,7 +149,7 @@ public class WorkbookReader {
 		default:
 			throw new WrongCellFormatException(cellNum + 1, row.getRowNum() + 1);
 		}
-		
+
 		return retCell;
 
 	}
