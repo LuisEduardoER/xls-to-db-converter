@@ -73,8 +73,11 @@ public class Application {
 
 		// Working with database
 		/*
-		 * try { DBWorker db = new DBWorker(); db.сonnect(); db.sendToDB(list,
-		 * report); db.disconnect(); } catch (DataBaseException e) {
+		 * try { DBWorker db = new DBWorker();
+		 * db.сonnect();
+		 * db.sendToDB(list,report);
+		 * db.disconnect(); 
+		 * } catch (DataBaseException e) {
 		 * report.writeln(e.getMessage()); } finally { report.close(); }
 		 */
 		report.close();
