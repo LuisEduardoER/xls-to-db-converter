@@ -1,6 +1,5 @@
 package main;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -33,6 +32,7 @@ public class Application {
 			AppSlave.commandLineArgumentsTester(args);
 		} catch (CommandLineArgumentException e) {
 			System.out.println(e);
+			report.close();
 			return;
 		}
 
@@ -50,9 +50,11 @@ public class Application {
 			}
 		} catch (UnsupportedExtOfInputFileException e) {
 			report.writeln(e.toString());
+			report.close();
 			return;
-		} catch (FileNotFoundException e) {
+		} catch (InputFileNotFoundException e) {
 			report.writeln(e.toString());
+			report.close();
 			return;
 		}
 
@@ -63,6 +65,7 @@ public class Application {
 			iter = list.iterator();
 		} catch (NullPointerException e) {
 			report.writeln("Не удалось заполнить LinkedList");
+			report.close();
 			return;
 		}
 
@@ -72,16 +75,14 @@ public class Application {
 		}
 
 		// Working with database
-		
-		try { 
-		DBWorker db = new DBWorker();
+		try {
+			DBWorker db = new DBWorker();
 			db.сonnect();
-			db.sendToDB(list,report);
-			db.disconnect(); 
+			db.sendToDB(list, report);
+			db.disconnect();
 		} catch (DataBaseException e) {
-			report.writeln(e.getMessage()); 
+			report.writeln(e.getMessage());
 		}
-		 
 		report.close();
 	}
 }
