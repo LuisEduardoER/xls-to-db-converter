@@ -25,7 +25,7 @@ import model.SheetLine;
  */
 public class DBWorker {
 
-	private String url; // Переменные для информации для подключения к БД
+	private String url; 			// Переменные для информации для подключения к БД
 	private String driver;
 	private String user;
 	private String password;
@@ -34,22 +34,20 @@ public class DBWorker {
 	private String dbTableOfOrg;
 	private String dbTableOfOrgType;
 
-	private Connection connection; // Ссылки на объекты для подключения к БД
+	private Connection connection; 	// Ссылки на объекты для подключения к БД
 	private Statement statement;
 	private ResultSet resultSet;
 	private Properties propertiesForConnect;
 
-	private String[] typeOrgStr; // Для хранения типов организаций (ООО, ИП,
-									// ЧУП...)
-	private long[] typeOrgId; // и их ID в БД (1, 2, 3...)
+	private String[] typeOrgStr; 	// Для хранения типов организаций (ООО, ИП, ЧУП...)
+	private long[] typeOrgId; 		// и их ID в БД (1, 2, 3...)
 
-	// private final int MAX_UNP = 999999999; // Минимальные и максимальные
-	// значения УНП, ОКПО, Р/с
-	// private final int MIN_UNP = 100000000;
-	// private final long MAX_OKPO = 999999999999l;
-	// private final long MIN_OKPO = 100000000000l;
-	// private final long MAX_ACCOUNT = 9999999999999l;
-	// private final long MIN_ACCOUNT = 1000000000000l;
+	private final int  MAX_UNP = 999999999; 		// Минимальные и максимальные значения УНП, ОКПО, Р/с
+	private final int  MIN_UNP = 100000000;
+	private final long MAX_OKPO = 999999999999l;
+	private final long MIN_OKPO = 100000000000l;
+	private final long MAX_ACCOUNT = 9999999999999l;
+	private final long MIN_ACCOUNT = 1000000000000l;
 
 	/**
 	 * Стандартный конструктор данные для подключения берутся из файла
@@ -62,27 +60,20 @@ public class DBWorker {
 	public DBWorker() throws DataBaseException {
 		try {
 			Properties properties = new Properties();
-			properties
-					.load(new FileInputStream("resources/database.properties"));
+			properties.load(new FileInputStream("resources/database.properties"));
 
-			this.url = properties.getProperty("db.url") + "/"
-					+ properties.getProperty("db.schema");
-			this.driver = properties.getProperty("db.driver");
-			this.user = properties.getProperty("db.user");
-			this.password = properties.getProperty("db.password");
-			this.useUnicode = properties.getProperty("db.useUnicode");
-			this.characterEncoding = properties
-					.getProperty("db.characterEncoding");
-			this.dbTableOfOrg = properties.getProperty("db.dbTableOfOrg");
-			this.dbTableOfOrgType = properties
-					.getProperty("db.dbTableOfOrgType");
+			this.url 				= properties.getProperty("db.url") + "/" + properties.getProperty("db.schema");
+			this.driver 			= properties.getProperty("db.driver");
+			this.user 				= properties.getProperty("db.user");
+			this.password 			= properties.getProperty("db.password");
+			this.useUnicode 		= properties.getProperty("db.useUnicode");
+			this.characterEncoding 	= properties.getProperty("db.characterEncoding");
+			this.dbTableOfOrg 		= properties.getProperty("db.dbTableOfOrg");
+			this.dbTableOfOrgType 	= properties.getProperty("db.dbTableOfOrgType");
 		} catch (FileNotFoundException exception) {
-			throw new DataBaseException("Не найден файл database.properties",
-					exception);
+			throw new DataBaseException("Не найден файл database.properties", exception);
 		} catch (IOException exception) {
-			throw new DataBaseException(
-					"Ошибка ввода/вывода в файле database.properties",
-					exception);
+			throw new DataBaseException("Ошибка ввода/вывода в файле database.properties", exception);
 		}
 
 		try {
@@ -90,11 +81,9 @@ public class DBWorker {
 			propertiesForConnect.setProperty("user", user);
 			propertiesForConnect.setProperty("password", password);
 			propertiesForConnect.setProperty("useUnicode", useUnicode);
-			propertiesForConnect.setProperty("characterEncoding",
-					characterEncoding);
+			propertiesForConnect.setProperty("characterEncoding", characterEncoding);
 		} catch (NullPointerException exception) {
-			throw new DataBaseException(
-					"Ошибка данных файла database.properties", exception);
+			throw new DataBaseException("Ошибка данных файла database.properties", exception);
 		}
 
 	}
@@ -122,45 +111,33 @@ public class DBWorker {
 	public void сonnect() throws DataBaseException {
 		try {
 			Class.forName(driver); // Регистрируем драйвер
-			connection = (Connection) DriverManager.getConnection(url,
-					propertiesForConnect); // Выполняем подключение к БД
+			connection = (Connection) DriverManager.getConnection(url, propertiesForConnect); 	// Выполняем подключение к БД
 			statement = (Statement) connection.createStatement();
-			// Настраиваем MySQL на получение данных в utf8
-			resultSet = statement
-					.executeQuery("SET character_set_client='utf8'");
-			// Настраиваем MySQL на возврат данных в utf8
-			resultSet = statement
-					.executeQuery("SET character_set_results='utf8'");
-			resultSet = statement
-					.executeQuery("SET collation_connection='utf8_general_ci'");
+			
+			resultSet = statement.executeQuery("SET character_set_client='utf8'");				// Настраиваем MySQL на получение данных в utf8
+			resultSet = statement.executeQuery("SET character_set_results='utf8'");				// Настраиваем MySQL на возврат данных в utf8
+			resultSet = statement.executeQuery("SET collation_connection='utf8_general_ci'");
 
 			// Определяем все возможные типы организаций
-			resultSet = statement.executeQuery("SELECT COUNT(type) FROM "
-					+ dbTableOfOrgType); // Количество разных типов организаций
-											// получаем из 2 таблицы
+			resultSet = statement.executeQuery("SELECT COUNT(type) FROM " + dbTableOfOrgType); 	// Количество разных типов организаций
+																								// получаем из 2 таблицы
 			resultSet.next();
-			// Массив для хранения полученных сокращений организаций (ООО, ЧУП,
-			// ИП...)
-			typeOrgStr = new String[resultSet.getInt(1)];
-			// Массив для хранения ID в БД полученных сокращений организаций (1,
-			// 2, 3...)
-			typeOrgId = new long[resultSet.getInt(1)];
+			
+			typeOrgStr = new String[resultSet.getInt(1)];	// Массив для хранения полученных сокращений организаций (ООО, ЧУП, ИП...)
+			typeOrgId  = new long  [resultSet.getInt(1)];	// Массив для хранения ID в БД полученных сокращений организаций (1, 2, 3...)
 
 			/**
 			 * TODO следующая одна строка только для отладки
 			 */
 			System.out.println("Все извлечённые из БД типы организаций:");
-			resultSet = statement.executeQuery("SELECT title, type FROM "
-					+ dbTableOfOrgType); // Получаем все типы оргнанизации из 2
-											// таблицы
+			resultSet = statement.executeQuery("SELECT title, type FROM " + dbTableOfOrgType); 	// Получаем все типы оргнанизации из 2 таблицы
 			for (int i = 0; resultSet.next(); i++) {
 				typeOrgStr[i] = resultSet.getString(1);
 				typeOrgId[i] = resultSet.getLong(2);
 				/**
 				 * TODO только для отладки
 				 */
-				System.out.println(resultSet.getString(1) + " "
-						+ resultSet.getLong(2));
+				System.out.println(resultSet.getString(1) + " " + resultSet.getLong(2));
 			}
 			/**
 			 * TODO только для отладки
@@ -199,7 +176,7 @@ public class DBWorker {
 	 *            тип организации (ООО, ИП, ЧУП...)
 	 * @param name
 	 *            имя организации
-	 * @param adress
+	 * @param address
 	 *            адрес органиации
 	 * @param unp
 	 *            УНП организации
@@ -219,11 +196,10 @@ public class DBWorker {
 	 *         5 - запись не добавлена (не прошёл запрос на проверку
 	 *         уникальности данной организации)
 	 */
-	private int insert(String number, String type, String name, String adress,
+	private int insert(String number, String type, String name, String address,
 			String unp, String okpo, String account, boolean isNet) {
 
-		int typeOrg = -1; // Хранение ID типа организации (индекса массива
-							// typeOrgId)
+		int typeOrg = -1; 		// Хранение ID типа организации (индекса массива typeOrgId)
 
 		for (int i = 0; i < typeOrgId.length; i++)
 			// Поиск ID типа организации
@@ -236,26 +212,25 @@ public class DBWorker {
 			return 1;
 
 		try {
-			resultSet = statement.executeQuery("SELECT COUNT(*) FROM "
-					+ dbTableOfOrg + " WHERE number = \"" + number
+			resultSet = statement.executeQuery("SELECT COUNT(*) FROM " 
+					+ dbTableOfOrg + " WHERE num = \"" + number
 					+ "\" AND type = " + typeOrgId[typeOrg] + " AND name = \""
-					+ name + "\" AND adress = \"" + adress + "\" AND unp = "
+					+ name + "\" AND address = \"" + address + "\" AND unp = "
 					+ unp + " AND okpo = " + okpo + " AND account = " + account
-					+ " AND isNet = " + isNet);
+					+ " AND is_net = " + isNet);
 			resultSet.next();
-			if (resultSet.getInt(1) > 0) // Если в БД уже такая организация
+			if (resultSet.getInt(1) > 0) 					// Если в БД уже такая организация
 				return 4;
-		} catch (SQLException e) { // Если запрос на выборку неккорректен
+		} catch (SQLException e) { 							// Если запрос на выборку неккорректен
 			return 5;
 		}
 
-		String insertQuerry; // Добавление в таблицу типа органицзации с помощью
-								// SQL-запроса INSERT
+		String insertQuerry; 								// Добавление в таблицу типа органицзации с помощью SQL-запроса INSERT
 		insertQuerry = "INSERT INTO "
 				+ dbTableOfOrg
-				+ " (number, type, name, adress, unp, okpo, account, isNet) VALUES (\""
+				+ " (num, type, name, address, unp, okpo, account, is_net) VALUES (\""
 				+ number + "\", \"" + typeOrgId[typeOrg] + "\", \"" + name
-				+ "\", \"" + adress + "\", " + unp + ", " + okpo + ", "
+				+ "\", \"" + address + "\", " + unp + ", " + okpo + ", "
 				+ account + ", " + isNet + ")";
 
 		/**
@@ -270,16 +245,13 @@ public class DBWorker {
 				/**
 				 * TODO только для отладки
 				 */
-				System.out
-						.println("Иcключение: несоответствие параметра по длине");
+				System.out.println("Иcключение: несоответствие параметра по длине");
 				return 2;
 			}
 			/**
 			 * TODO только для отладки
 			 */
-			System.out
-					.println("Исключение (неизвестная ошибка): getErrorCode = "
-							+ e.getErrorCode());
+			System.out.println("Исключение (неизвестная ошибка): getErrorCode = " + e.getErrorCode());
 			return 3;
 		}
 		return 0; // Успешное завершение (запись добавлена)
@@ -295,30 +267,25 @@ public class DBWorker {
 	 *            объект для работы с файлом отчёта
 	 * @throws IOException
 	 */
-	public void sendToDB(LinkedList<SheetLine> sl, Report report)
-			throws IOException {
+	public void sendToDB(LinkedList<SheetLine> sl, Report report) throws IOException {
 
 		report.writeln("Обнаружено записей: " + sl.size());
 		int success = 0; // Успешно добавлено в БД
 
 		for (int i = 0; i < sl.size(); i++) {
 			SheetLine sheetLine = sl.get(i);
-			if (sheetLine.getUnp() > 999999999 || sheetLine.getUnp() < 0) {
-				report.writeln("ОШИБКА. Строка "
-						+ sheetLine.getRow()
-						+ " не добавлена в БД. Слишком длинный или отрицательный УНП.");
+			if (sheetLine.getUnp() > MAX_UNP || sheetLine.getUnp() < MIN_UNP) {
+				report.writeln("ОШИБКА. Строка " + sheetLine.getRow()
+						+ " не добавлена в БД. УНП вне допустимого диапазона.");
 				continue;
 			}
-			if (sheetLine.getOkpo() > 999999999999l || sheetLine.getOkpo() < 0) {
-				report.writeln("ОШИБКА. Строка "
-						+ sheetLine.getRow()
-						+ " не добавлена в БД. Слишком длинный или отрицательный ОКПО.");
+			if (sheetLine.getOkpo() > MAX_OKPO || sheetLine.getOkpo() < MIN_OKPO) {
+				report.writeln("ОШИБКА. Строка " + sheetLine.getRow()
+						+ " не добавлена в БД. ОКПО вне допустимого диапазона.");
 				continue;
 			}
-			if (sheetLine.getAccount() > 9999999999999l
-					|| sheetLine.getAccount() < 0) {
-				report.writeln("ОШИБКА. Строка "
-						+ sheetLine.getRow()
+			if (sheetLine.getAccount() > MAX_ACCOUNT || sheetLine.getAccount() < MIN_ACCOUNT) {
+				report.writeln("ОШИБКА. Строка " + sheetLine.getRow()
 						+ " не добавлена в БД. Слишком длинный или отрицательный расчётный счёт.");
 				continue;
 			}
@@ -332,13 +299,11 @@ public class DBWorker {
 				success++;
 				break;
 			case 1:
-				report.writeln("ОШИБКА. Строка "
-						+ sheetLine.getRow()
+				report.writeln("ОШИБКА. Строка " + sheetLine.getRow()
 						+ " не добавлена в БД. Указанный тип организации отсутствует в БД");
 				break;
 			case 2:
-				report.writeln("ОШИБКА. Строка "
-						+ sheetLine.getRow()
+				report.writeln("ОШИБКА. Строка " + sheetLine.getRow()
 						+ " не добавлена в БД. Параметры не соответсвуют по длине");
 				break;
 			case 3:
@@ -350,13 +315,11 @@ public class DBWorker {
 						+ " не добавлена в БД. Такая организация уже есть в БД");
 				break;
 			case 5:
-				report.writeln("ОШИБКА. Строка "
-						+ sheetLine.getRow()
+				report.writeln("ОШИБКА. Строка " + sheetLine.getRow()
 						+ " не добавлена в БД. Не прошёл SQL-запрос на проверку уникальности данной организации");
 				break;
 			default:
-				report.writeln("ОШИБКА. Строка "
-						+ sheetLine.getRow()
+				report.writeln("ОШИБКА. Строка " + sheetLine.getRow()
 						+ " не добавлена в БД. Ошибка программирования. Если вы видете эту надпись, значит ошибся программист");
 				break;
 			}
