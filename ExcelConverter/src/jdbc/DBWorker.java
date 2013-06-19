@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Formatter;
 import java.util.LinkedList;
 import java.util.Properties;
 import com.mysql.jdbc.Connection;
@@ -25,22 +26,38 @@ import model.SheetLine;
  */
 public class DBWorker {
 
-	private String url; 			// Переменные для информации для подключения к БД
+	private String url; 					// Переменные для информации для подключения к БД
 	private String driver;
 	private String user;
 	private String password;
 	private String useUnicode;
 	private String characterEncoding;
-	private String dbTableOfOrg;
+	private String dbTableOfOrg;	
 	private String dbTableOfOrgType;
-
-	private Connection connection; 	// Ссылки на объекты для подключения к БД
-	private Statement statement;
-	private ResultSet resultSet;
+	
+	private String dbID;					// Переменные для обращения к полям БД
+	private String dbNum;
+	private String dbType;
+	private String dbName;
+	private String dbAddress;
+	private String dbUnp;
+	private String dbOkpo;
+	private String dbAccount;
+	private String dbIsNet;
+	
+	private String dbIDType;
+	private String dbTitle;
+	private String dbFullname;
+	
+	private Formatter 	  formatter;
+	
+	private Connection connection; 			// Ссылки на объекты для подключения к БД
+	private Statement  statement;
+	private ResultSet  resultSet;
 	private Properties propertiesForConnect;
 
-	private String[] typeOrgStr; 	// Для хранения типов организаций (ООО, ИП, ЧУП...)
-	private long[] typeOrgId; 		// и их ID в БД (1, 2, 3...)
+	private String[] typeOrgStr; 			// Для хранения типов организаций (ООО, ИП, ЧУП...)
+	private long[] typeOrgId; 				// и их ID в БД (1, 2, 3...)
 
 	private final int  MAX_UNP = 999999999; 		// Минимальные и максимальные значения УНП, ОКПО, Р/с
 	private final int  MIN_UNP = 100000000;
@@ -70,6 +87,21 @@ public class DBWorker {
 			this.characterEncoding 	= properties.getProperty("db.characterEncoding");
 			this.dbTableOfOrg 		= properties.getProperty("db.dbTableOfOrg");
 			this.dbTableOfOrgType 	= properties.getProperty("db.dbTableOfOrgType");
+			
+			this.dbID				= properties.getProperty("db.Org.id");			
+			this.dbNum				= properties.getProperty("db.Org.num");
+			this.dbType				= properties.getProperty("db.Org.type");
+			this.dbName				= properties.getProperty("db.Org.name");
+			this.dbAddress			= properties.getProperty("db.Org.address");
+			this.dbUnp				= properties.getProperty("db.Org.unp");
+			this.dbOkpo				= properties.getProperty("db.Org.okpo");
+			this.dbAccount			= properties.getProperty("db.Org.account");
+			this.dbIsNet			= properties.getProperty("db.Org.isNet");
+			
+			this.dbIDType			= properties.getProperty("db.OrgType.idType");
+			this.dbTitle			= properties.getProperty("db.OrgType.title");
+			this.dbFullname			= properties.getProperty("db.OrgType.fullname");
+					
 		} catch (FileNotFoundException exception) {
 			throw new DataBaseException("Не найден файл database.properties", exception);
 		} catch (IOException exception) {
@@ -85,7 +117,7 @@ public class DBWorker {
 		} catch (NullPointerException exception) {
 			throw new DataBaseException("Ошибка данных файла database.properties", exception);
 		}
-
+		
 	}
 
 	/**
@@ -112,36 +144,32 @@ public class DBWorker {
 		try {
 			Class.forName(driver); // Регистрируем драйвер
 			connection = (Connection) DriverManager.getConnection(url, propertiesForConnect); 	// Выполняем подключение к БД
-			statement = (Statement) connection.createStatement();
+			statement  = (Statement)  connection.createStatement();
 			
 			resultSet = statement.executeQuery("SET character_set_client='utf8'");				// Настраиваем MySQL на получение данных в utf8
 			resultSet = statement.executeQuery("SET character_set_results='utf8'");				// Настраиваем MySQL на возврат данных в utf8
 			resultSet = statement.executeQuery("SET collation_connection='utf8_general_ci'");
 
 			// Определяем все возможные типы организаций
-			resultSet = statement.executeQuery("SELECT COUNT(type) FROM " + dbTableOfOrgType); 	// Количество разных типов организаций
-																								// получаем из 2 таблицы
+			resultSet = statement.executeQuery("SELECT COUNT(" + dbIDType + 					// Количество разных типов организаций
+											   ") FROM " + dbTableOfOrgType); 					// получаем из 2 таблицы
 			resultSet.next();
 			
 			typeOrgStr = new String[resultSet.getInt(1)];	// Массив для хранения полученных сокращений организаций (ООО, ЧУП, ИП...)
 			typeOrgId  = new long  [resultSet.getInt(1)];	// Массив для хранения ID в БД полученных сокращений организаций (1, 2, 3...)
 
-			/**
-			 * TODO следующая одна строка только для отладки
-			 */
+			// TODO следующая строка только для отладки
 			System.out.println("Все извлечённые из БД типы организаций:");
-			resultSet = statement.executeQuery("SELECT title, type FROM " + dbTableOfOrgType); 	// Получаем все типы оргнанизации из 2 таблицы
+			formatter = new Formatter();
+			formatter.format("SELECT %s, %s FROM %s", dbTitle, dbType, dbTableOfOrgType);
+			resultSet = statement.executeQuery(formatter.toString()); 	// Получаем все типы оргнанизации из 2 таблицы
 			for (int i = 0; resultSet.next(); i++) {
 				typeOrgStr[i] = resultSet.getString(1);
-				typeOrgId[i] = resultSet.getLong(2);
-				/**
-				 * TODO только для отладки
-				 */
+				typeOrgId[i]  = resultSet.getLong(2);
+				// TODO следующая строка только для отладки
 				System.out.println(resultSet.getString(1) + " " + resultSet.getLong(2));
 			}
-			/**
-			 * TODO только для отладки
-			 */
+			// TODO следующая строка только для отладки
 			System.out.println("---------------------------------------");
 		} catch (ClassNotFoundException e) {
 			throw new DataBaseException("Ошибка создания объекта класса", e);
@@ -212,12 +240,15 @@ public class DBWorker {
 			return 1;
 
 		try {
-			resultSet = statement.executeQuery("SELECT COUNT(*) FROM " 
-					+ dbTableOfOrg + " WHERE num = \"" + number
-					+ "\" AND type = " + typeOrgId[typeOrg] + " AND name = \""
-					+ name + "\" AND address = \"" + address + "\" AND unp = "
-					+ unp + " AND okpo = " + okpo + " AND account = " + account
-					+ " AND is_net = " + isNet);
+			formatter = new Formatter();
+			formatter.format("SELECT COUNT(*) FROM %s WHERE %s = \"%s\" AND %s = %d AND %s = \"%s\" " +
+							 "AND %s = \"%s\" AND %s = %s AND %s = %s AND %s = %s AND %s = %b", 
+							 dbTableOfOrg, dbNum, number, dbType, typeOrgId[typeOrg], dbName, name,
+							 dbAddress, address, dbUnp, unp, dbOkpo, okpo, dbAccount, account,
+							 dbIsNet, isNet);
+			// TODO следующая строка только для отдаки
+			System.out.println("Выполняем запрос на проверку уникальности: " + formatter.toString());
+			resultSet = statement.executeQuery(formatter.toString());
 			resultSet.next();
 			if (resultSet.getInt(1) > 0) 					// Если в БД уже такая организация
 				return 4;
@@ -225,32 +256,24 @@ public class DBWorker {
 			return 5;
 		}
 
-		String insertQuerry; 								// Добавление в таблицу типа органицзации с помощью SQL-запроса INSERT
-		insertQuerry = "INSERT INTO "
-				+ dbTableOfOrg
-				+ " (num, type, name, address, unp, okpo, account, is_net) VALUES (\""
-				+ number + "\", \"" + typeOrgId[typeOrg] + "\", \"" + name
-				+ "\", \"" + address + "\", " + unp + ", " + okpo + ", "
-				+ account + ", " + isNet + ")";
-
-		/**
-		 * TODO только для отладки
-		 */
-		System.out.println("Выполняем запрос на добавление: " + insertQuerry);
+		formatter = new Formatter();																// Добавление в таблицу типа органицзации с помощью SQL-запроса INSERT
+		formatter.format("INSERT INTO %s (%s, %s, %s, %s, %s, %s, %s, %s) VALUES (\"%s\", " +
+						 "%s, \"%s\", \"%s\", %s, %s, %s, %s)", dbTableOfOrg, dbNum,
+						 dbType, dbName, dbAddress, dbUnp, dbOkpo, dbAccount, dbIsNet, number,
+						 typeOrgId[typeOrg], name, address, unp, okpo, account, isNet);
+		
+		// TODO следующая строка только для отладки
+		System.out.println("Выполняем запрос на добавление: " + formatter.toString());
 
 		try {
-			statement.executeUpdate(insertQuerry);
+			statement.executeUpdate(formatter.toString());
 		} catch (SQLException e) {
 			if (e.getErrorCode() == 1406) { // Несоответствие по длине
-				/**
-				 * TODO только для отладки
-				 */
+				// TODO следующая строка только для отладки
 				System.out.println("Иcключение: несоответствие параметра по длине");
 				return 2;
 			}
-			/**
-			 * TODO только для отладки
-			 */
+			// TODO следующая строка только для отладки
 			System.out.println("Исключение (неизвестная ошибка): getErrorCode = " + e.getErrorCode());
 			return 3;
 		}
