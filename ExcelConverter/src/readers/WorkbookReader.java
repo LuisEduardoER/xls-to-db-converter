@@ -112,11 +112,12 @@ public class WorkbookReader {
 							.getValue()));
 					retCell = retDoubleCell;
 				} catch (NumberFormatException e) {
-					throw new WrongCellFormatException(cellNum + 1,
-							row.getRowNum() + 1);
+					throw new WrongCellFormatException(cellNum + 1, row
+							.getRowNum() + 1);
 				}
+			} else {
+				retCell = retStringCell;
 			}
-			retCell = retStringCell;
 			break;
 		case Cell.CELL_TYPE_NUMERIC:
 			retDoubleCell = new ReturnedCell<Double>();
@@ -126,18 +127,21 @@ public class WorkbookReader {
 				try {
 					retStringCell.setValue(Double.toString(retDoubleCell
 							.getValue()));
+					Long tmp = retDoubleCell.getValue().longValue();
+					retStringCell.setValue(tmp.toString());
 					retCell = retStringCell;
 				} catch (NumberFormatException e) {
-					throw new WrongCellFormatException(cellNum + 1,
-							row.getRowNum() + 1);
+					throw new WrongCellFormatException(cellNum + 1, row
+							.getRowNum() + 1);
 				}
+			} else {
+				retCell = retDoubleCell;
 			}
-			retCell = retDoubleCell;
 			break;
 		default:
 			throw new WrongCellFormatException(cellNum + 1, row.getRowNum() + 1);
 		}
-
+		
 		return retCell;
 
 	}
@@ -149,7 +153,6 @@ public class WorkbookReader {
 			try {
 				list.add(getLine(i));
 			} catch (WrongCellFormatException e) {
-				// TODO: Write this information to report
 				report.writeln(e.toString());
 			} catch (UnsupportedFormatOfInputFileException e) {
 				report.writeln(e.toString());
