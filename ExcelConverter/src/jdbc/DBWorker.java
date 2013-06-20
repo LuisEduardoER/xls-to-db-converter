@@ -35,7 +35,7 @@ public class DBWorker {
 	private String dbTableOfOrg;	
 	private String dbTableOfOrgType;
 	
-	private String dbID;					// Переменные для обращения к полям БД
+	//private String dbID;					// Переменные для обращения к полям БД
 	private String dbNum;
 	private String dbType;
 	private String dbName;
@@ -47,7 +47,7 @@ public class DBWorker {
 	
 	private String dbIDType;
 	private String dbTitle;
-	private String dbFullname;
+	//private String dbFullname;
 	
 	private Formatter 	  formatter;
 	
@@ -88,7 +88,7 @@ public class DBWorker {
 			this.dbTableOfOrg 		= properties.getProperty("db.dbTableOfOrg");
 			this.dbTableOfOrgType 	= properties.getProperty("db.dbTableOfOrgType");
 			
-			this.dbID				= properties.getProperty("db.Org.id");			
+			//this.dbID				= properties.getProperty("db.Org.id");			
 			this.dbNum				= properties.getProperty("db.Org.num");
 			this.dbType				= properties.getProperty("db.Org.type");
 			this.dbName				= properties.getProperty("db.Org.name");
@@ -100,7 +100,7 @@ public class DBWorker {
 			
 			this.dbIDType			= properties.getProperty("db.OrgType.idType");
 			this.dbTitle			= properties.getProperty("db.OrgType.title");
-			this.dbFullname			= properties.getProperty("db.OrgType.fullname");
+			//this.dbFullname		= properties.getProperty("db.OrgType.fullname");
 					
 		} catch (FileNotFoundException exception) {
 			throw new DataBaseException("Не найден файл database.properties", exception);
