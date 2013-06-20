@@ -1,1 +1,1 @@
-Невозможно найти файл с именем /home/emergency/workspace/ExcelConverter/template/schema_xls.xls
+Не найден файл database.properties
