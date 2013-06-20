@@ -77,7 +77,7 @@ public class DBWorker {
 	public DBWorker() throws DataBaseException {
 		try {
 			Properties properties = new Properties();
-			properties.load(new FileInputStream("resources/database.properties"));
+			properties.load(new FileInputStream("database.properties"));
 
 			this.url 				= properties.getProperty("db.url") + "/" + properties.getProperty("db.schema");
 			this.driver 			= properties.getProperty("db.driver");
