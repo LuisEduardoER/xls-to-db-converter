@@ -1,6 +1,6 @@
 package by.ericpol.xls_to_db_converter.jdbc;
 
-import java.io.FileInputStream;
+//import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
