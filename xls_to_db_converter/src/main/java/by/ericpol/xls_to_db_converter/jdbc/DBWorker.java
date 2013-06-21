@@ -3,6 +3,7 @@ package by.ericpol.xls_to_db_converter.jdbc;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -78,8 +79,10 @@ public class DBWorker {
 	 */
 	public DBWorker() throws DataBaseException {
 		try {
+			InputStream in;
+			in = ClassLoader.getSystemClassLoader().getResourceAsStream("database.properties");
 			Properties properties = new Properties();
-			properties.load(new FileInputStream("database.properties"));
+			properties.load(in);
 
 			this.url 				= properties.getProperty("db.url") + "/" + properties.getProperty("db.schema");
 			this.driver 			= properties.getProperty("db.driver");
