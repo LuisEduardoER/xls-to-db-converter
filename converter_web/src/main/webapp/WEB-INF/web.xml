@@ -5,11 +5,11 @@
 <web-app>
   <display-name>Archetype Created Web Application</display-name>
   <servlet>
-  	<servlet-name>App</servlet-name>
-  	<servlet-class>app.Application</servlet-class>
+  	<servlet-name>FileGetter</servlet-name>
+  	<servlet-class>servlets.FileGetter</servlet-class>
   </servlet>
   <servlet-mapping>
-  	<servlet-name>App</servlet-name>
+  	<servlet-name>FileGetter</servlet-name>
   	<url-pattern>/</url-pattern>
   </servlet-mapping>
   <welcome-file-list>
