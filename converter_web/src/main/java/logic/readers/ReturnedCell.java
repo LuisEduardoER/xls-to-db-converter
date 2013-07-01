@@ -1,4 +1,4 @@
-package readers;
+package logic.readers;
 
 public class ReturnedCell<T> {
 	private T value;

@@ -1,4 +1,4 @@
-package jdbc;
+package web.jdbc;
 
 public class ConnectionManager {
 

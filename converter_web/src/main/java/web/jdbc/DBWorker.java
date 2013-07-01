@@ -1,4 +1,4 @@
-package jdbc;
+package web.jdbc;
 
 //import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -11,9 +11,9 @@ import java.util.Formatter;
 import java.util.LinkedList;
 import java.util.Properties;
 
-import entity.Report;
-import entity.SheetLine;
-import exceptions.DataBaseException;
+import logic.entity.Report;
+import logic.entity.SheetLine;
+import logic.exceptions.DataBaseException;
 
 import com.mysql.jdbc.Connection;
 import com.mysql.jdbc.Statement;

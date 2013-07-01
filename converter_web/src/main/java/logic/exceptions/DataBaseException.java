@@ -1,4 +1,4 @@
-package exceptions;
+package logic.exceptions;
 
 /**
  * Исключение генерируемое при работе с объектом класса <code>DBWorker</code>

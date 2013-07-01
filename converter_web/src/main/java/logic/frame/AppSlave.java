@@ -1,6 +1,6 @@
-package frame;
+package logic.frame;
 
-import exceptions.*;
+import logic.exceptions.*;
 
 enum Extensions {
 	XLS, XLSX

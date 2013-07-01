@@ -1,4 +1,4 @@
-package exceptions;
+package logic.exceptions;
 
 public class CommandLineArgumentException extends Exception {
 
