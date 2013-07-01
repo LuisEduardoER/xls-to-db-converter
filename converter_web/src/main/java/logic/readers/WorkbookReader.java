@@ -1,4 +1,4 @@
-package readers;
+package logic.readers;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -6,14 +6,13 @@ import java.io.FileNotFoundException;
 import java.io.IOException; //import java.util.LinkedList;
 import java.util.LinkedList;
 
+import logic.entity.Report;
+import logic.entity.SheetLine;
+import logic.exceptions.InputFileNotFoundException;
+import logic.exceptions.UnsupportedFormatOfInputFileException;
+import logic.exceptions.WrongCellFormatException;
 
 import org.apache.poi.ss.usermodel.*;
-
-import entity.Report;
-import entity.SheetLine;
-import exceptions.InputFileNotFoundException;
-import exceptions.UnsupportedFormatOfInputFileException;
-import exceptions.WrongCellFormatException;
 
 
 enum CellType {

@@ -1,16 +1,16 @@
-package frame;
+package logic.frame;
 
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.LinkedList;
 
-import entity.Report;
-import entity.SheetLine;
-import exceptions.*;
-import jdbc.DBWorker;
-import readers.WorkbookReader;
-import readers.XLSReader;
-import readers.XLSXReader;
+import web.jdbc.DBWorker;
+import logic.entity.Report;
+import logic.entity.SheetLine;
+import logic.exceptions.*;
+import logic.readers.WorkbookReader;
+import logic.readers.XLSReader;
+import logic.readers.XLSXReader;
 
 public class Application {
 	private static String filename;

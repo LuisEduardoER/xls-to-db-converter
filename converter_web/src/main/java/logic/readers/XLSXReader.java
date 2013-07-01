@@ -1,12 +1,11 @@
-package readers;
+package logic.readers;
 
 import java.io.IOException;
 
+import logic.entity.Report;
+import logic.exceptions.InputFileNotFoundException;
 
 import org.apache.poi.xssf.usermodel.*;
-
-import entity.Report;
-import exceptions.InputFileNotFoundException;
 
 
 public class XLSXReader extends WorkbookReader {

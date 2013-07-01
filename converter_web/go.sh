@@ -1,26 +1,26 @@
 #!/bin/bash
 
-TOMCAT_DIR="/opt/apache-tomcat-7.0.11/"
+TOMCAT_DIR="/opt/tomcat-7/"
 WEBAPPS_DIR="${TOMCAT_DIR}webapps/"
 WAR_FILE="${WEBAPPS_DIR}converter_web.war"
 WAR_DIR="${WEBAPPS_DIR}converter_web/"
 
-sh /opt/apache-tomcat-7.0.11/bin/shutdown.sh
+sudo sh /opt/apache-tomcat-7.0.11/bin/shutdown.sh
 echo
 
 if [ -f $WAR_FILE ]; then
-rm $WAR_FILE
+sudo rm $WAR_FILE
 echo $WAR_FILE removed
 fi
 
 if [ -d $WAR_DIR ]; then
-rm -R $WAR_DIR
+sudo rm -R $WAR_DIR
 echo $WAR_DIR removed
 fi
 
 echo
 
-cp ./target/converter_web.war $WEBAPPS_DIR
-sh ${TOMCAT_DIR}bin/startup.sh
+sudo cp ./target/converter_web.war $WEBAPPS_DIR
+sudo sh ${TOMCAT_DIR}bin/startup.sh
 echo
 echo Tomcat was started

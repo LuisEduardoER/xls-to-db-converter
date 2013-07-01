@@ -1,4 +1,4 @@
-package servlets;
+package web.servlets;
 
 import java.io.*;
 import java.rmi.ServerException;
