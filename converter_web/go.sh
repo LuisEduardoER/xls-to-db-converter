@@ -5,7 +5,7 @@ WEBAPPS_DIR="${TOMCAT_DIR}webapps/"
 WAR_FILE="${WEBAPPS_DIR}converter_web.war"
 WAR_DIR="${WEBAPPS_DIR}converter_web/"
 
-sudo sh /opt/apache-tomcat-7.0.11/bin/shutdown.sh
+sudo sh ${TOMCAT_DIR}bin/shutdown.sh
 echo
 
 if [ -f $WAR_FILE ]; then
