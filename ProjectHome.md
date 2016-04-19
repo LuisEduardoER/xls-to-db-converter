@@ -1,0 +1,1 @@
+This project allows to write contents of .xls and .xlsx files in database
